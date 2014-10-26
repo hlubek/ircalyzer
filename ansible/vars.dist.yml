@@ -1,0 +1,10 @@
+# The digital ocean id for idempotent playbook runs
+do_id: 1
+# Hostname for the digital ocean droplet
+do_hostname: ircalyzer
+# Name of the SSH key that is registered
+do_ssh_key_name: my_ssh_key
+my_pub_key: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+
+ssh_group: sshusers
+sudo_group: sudousers

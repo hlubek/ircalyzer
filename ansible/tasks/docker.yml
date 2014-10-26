@@ -1,0 +1,2 @@
+- name: Run influxdb docker container
+  docker: state=running image=tutum/influxdb ports="8083:8083,8086:8086" expose="8090,8099"

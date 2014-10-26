@@ -1,0 +1,21 @@
+# Run with the following command:
+#
+#   DO_CLIENT_ID=YOUR_CLIENT_ID DO_API_KEY=YOUR_API_KEY ansible-playbook -i localhost digital_ocean.yml
+#
+---
+- hosts: localhost
+  connection: local
+  serial: 1
+  gather_facts: no
+  vars_files:
+    - vars.yml
+  tasks:
+    - include: tasks/droplet.yml
+
+- hosts: droplets
+  user: root
+  vars_files:
+    - vars.yml
+  tasks:
+    - include: tasks/software.yml
+    - include: tasks/docker.yml

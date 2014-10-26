@@ -1,0 +1,12 @@
+FROM google/golang-runtime
+
+ENV INFLUXDB_PROTO http
+ENV INFLUXDB_HOST **ChangeMe**
+ENV INFLUXDB_PORT 8086
+ENV INFLUXDB_NAME ircalyzer
+ENV INFLUXDB_USER root
+ENV INFLUXDB_PASS root
+
+ENV IRC_SERVER irc.freenode.net:6667
+ENV IRC_NICK ircalyzer
+ENV IRC_CHANNEL #typo3-coreteam
