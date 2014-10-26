@@ -1,4 +1,6 @@
-- name: Run influxdb docker container
+- name: Run Influxdb docker container
   docker: name=influxdb state=running image=tutum/influxdb ports="8083:8083,8086:8086" expose="8090,8099"
-- name: Run ircalyzer docker container
+- name: Run Ircalyzer docker container
   docker: state=running image=hlubek/ircalyzer links="influxdb:influxdb"
+- name: Run Grafana docker container
+  docker: state=running image=tutum/grafana ports="80:80" env="INFLUXDB_HOST={{ ansible_default_ipv4.address }},INFLUXDB_NAME=ircalyzer,INFLUXDB_IS_GRAFANADB=true"
