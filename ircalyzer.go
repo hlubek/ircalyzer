@@ -11,7 +11,7 @@ var (
 	server       = os.Getenv("IRC_SERVER")
 	nick         = os.Getenv("IRC_NICK")
 	channel      = os.Getenv("IRC_CHANNEL")
-	influxdbHost = os.Getenv("INFLUXDB_HOST") + ":" + os.Getenv("INFLUXDB_PORT")
+	influxdbHost = getInfluxdbHost()
 	influxdbName = os.Getenv("INFLUXDB_NAME")
 	influxdbUser = os.Getenv("INFLUXDB_USER")
 	influxdbPass = os.Getenv("INFLUXDB_PASS")
@@ -92,4 +92,16 @@ func createDatabaseIfNotExists(client *influxdb.Client) {
 	} else {
 		log.Fatalf("Could not access influxdb: %v", err)
 	}
+}
+
+func getInfluxdbHost() string {
+	host := os.Getenv("INFLUXDB_HOST")
+	if host[0] == '$' {
+		host = os.Getenv(host[1:])
+	}
+	port := os.Getenv("INFLUXDB_PORT")
+	if port[0] == '$' {
+		port = os.Getenv(port[1:])
+	}
+	return host + ":" + port
 }

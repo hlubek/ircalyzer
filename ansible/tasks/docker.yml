@@ -1,2 +1,4 @@
 - name: Run influxdb docker container
-  docker: state=running image=tutum/influxdb ports="8083:8083,8086:8086" expose="8090,8099"
+  docker: name=influxdb state=running image=tutum/influxdb ports="8083:8083,8086:8086" expose="8090,8099"
+- name: Run ircalyzer docker container
+  docker: state=running image=hlubek/ircalyzer links="influxdb:influxdb"
