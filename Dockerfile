@@ -9,4 +9,4 @@ ENV INFLUXDB_PASS root
 
 ENV IRC_SERVER irc.freenode.net:6667
 ENV IRC_NICK ircalyzer
-ENV IRC_CHANNEL #typo3-coreteam
+ENV IRC_CHANNELS #typo3-coreteam,#typo3-neos

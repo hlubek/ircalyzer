@@ -5,12 +5,13 @@ import (
 	"github.com/thoj/go-ircevent"
 	"log"
 	"os"
+	"strings"
 )
 
 var (
 	server       = os.Getenv("IRC_SERVER")
 	nick         = os.Getenv("IRC_NICK")
-	channel      = os.Getenv("IRC_CHANNEL")
+	channels     = strings.Split(os.Getenv("IRC_CHANNELS"), ",")
 	influxdbHost = getInfluxdbHost()
 	influxdbName = os.Getenv("INFLUXDB_NAME")
 	influxdbUser = os.Getenv("INFLUXDB_USER")
@@ -35,22 +36,40 @@ func main() {
 	if err := conn.Connect(server); err != nil {
 		log.Fatal(err)
 	}
-	conn.AddCallback("001", func(e *irc.Event) { conn.Join(channel) })
+	conn.AddCallback("001", func(e *irc.Event) {
+		for _, channel := range channels {
+			conn.Join(channel)
+		}
+	})
 	conn.AddCallback("PRIVMSG", func(event *irc.Event) {
+		var channel string
+		if len(event.Arguments) == 0 {
+			return
+		} else {
+			channel = event.Arguments[0]
+		}
+
 		series := &influxdb.Series{
 			Name:    "message",
-			Columns: []string{"nick"},
+			Columns: []string{"nick", "channel"},
 			Points: [][]interface{}{
-				{event.Nick},
+				{event.Nick, channel},
 			},
 		}
 		err := client.WriteSeries([]*influxdb.Series{series})
 		if err != nil {
 			log.Printf("Error writing series: %v", err)
 		}
-		log.Printf("EVT: Message from %s", event.Nick)
+		log.Printf("EVT: Message from %s in channel %s", event.Nick, channel)
 	})
 	conn.AddCallback("JOIN", func(event *irc.Event) {
+		var channel string
+		if len(event.Arguments) == 0 {
+			return
+		} else {
+			channel = event.Arguments[0]
+		}
+
 		if event.Nick == nick {
 			log.Printf("Joined channel %s", channel)
 			return
@@ -58,16 +77,16 @@ func main() {
 
 		series := &influxdb.Series{
 			Name:    "join",
-			Columns: []string{"nick"},
+			Columns: []string{"nick", "channel"},
 			Points: [][]interface{}{
-				{event.Nick},
+				{event.Nick, channel},
 			},
 		}
 		err := client.WriteSeries([]*influxdb.Series{series})
 		if err != nil {
 			log.Printf("Error writing series: %v", err)
 		}
-		log.Printf("EVT: Join from %s", event.Nick)
+		log.Printf("EVT: Join from %s in channel %s", event.Nick, channel)
 	})
 	conn.Loop()
 }
@@ -96,11 +115,11 @@ func createDatabaseIfNotExists(client *influxdb.Client) {
 
 func getInfluxdbHost() string {
 	host := os.Getenv("INFLUXDB_HOST")
-	if host[0] == '$' {
+	if host != "" && host[0] == '$' {
 		host = os.Getenv(host[1:])
 	}
 	port := os.Getenv("INFLUXDB_PORT")
-	if port[0] == '$' {
+	if port != "" && port[0] == '$' {
 		port = os.Getenv(port[1:])
 	}
 	return host + ":" + port
